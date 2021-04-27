@@ -48,7 +48,7 @@ class TransactionsService(private val config: TimeIntervalConfig) {
     @Synchronized()
     fun calculateStatistics() {
         val latestTransactionAmounts = transactions
-            .filter { (k,v) -> isTransactionValid(k.toInstant()) }
+            .filter { (key) -> isTransactionValid(key.toInstant()) }
             .values.toList()
 
         statistics.count = latestTransactionAmounts.count().toLong()
