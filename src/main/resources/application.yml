@@ -1,2 +1,5 @@
+server:
+  port: $PORT
+
 time-interval-in-seconds:
   parameter: 60
