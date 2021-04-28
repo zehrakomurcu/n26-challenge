@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.junit.jupiter.MockitoExtension
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.context.ActiveProfiles
 import java.time.Duration
 import java.time.Instant
 import java.util.*
@@ -29,14 +31,14 @@ class TransactionsServiceUnitTest {
     @Test
     fun `save transaction should success when data is valid`() {
         //given
-        val transactionRequest = TransactionRequest(Date.from(Instant.now() - Duration.ofSeconds(5)), 21.45)
+        val transactionRequest = TransactionRequest(Date.from(Instant.now() - Duration.ofSeconds(5)), 21.45.toBigDecimal())
         transactionsService.saveTransaction(transactionRequest)
     }
 
     @Test
     fun `save transaction should fail when data is old`() {
         //given
-        val transactionsRequest = TransactionRequest(Date.from(Instant.now() - Duration.ofMinutes(5)), 21.2355)
+        val transactionsRequest = TransactionRequest(Date.from(Instant.now() - Duration.ofMinutes(5)), 21.2355.toBigDecimal())
 
         //when
         val result = assertThrows<OldTransactionException> { transactionsService.saveTransaction(transactionsRequest) }
@@ -48,7 +50,7 @@ class TransactionsServiceUnitTest {
     @Test
     fun `save transaction should fail when data is unprocessable`() {
         //given
-        val transactionRequest = TransactionRequest(Date.from(Instant.now() + Duration.ofMinutes(5)), 21.45)
+        val transactionRequest = TransactionRequest(Date.from(Instant.now() + Duration.ofMinutes(5)), 21.45.toBigDecimal())
 
         //when
         val result = assertThrows<FutureTransactionException> { transactionsService.saveTransaction(transactionRequest) }

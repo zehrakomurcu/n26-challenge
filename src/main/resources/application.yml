@@ -1,5 +1,11 @@
 server:
-  port: $PORT
+  port: 8080
 
 time-interval-in-seconds:
   parameter: 60
+
+---
+spring:
+  profiles: prod
+server:
+  port: $PORT

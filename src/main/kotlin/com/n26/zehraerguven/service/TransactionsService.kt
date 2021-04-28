@@ -5,20 +5,17 @@ import com.n26.zehraerguven.dto.StatisticsDto
 import com.n26.zehraerguven.dto.TransactionRequest
 import com.n26.zehraerguven.exception.FutureTransactionException
 import com.n26.zehraerguven.exception.OldTransactionException
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
+import java.math.BigDecimal
+import java.math.RoundingMode
 import java.time.Duration
 import java.time.Instant
 import java.util.*
-import kotlin.properties.Delegates
 
 @Service
 class TransactionsService(private val config: TimeIntervalConfig) {
 
-    private var transactions: MutableMap<Date, Double> = mutableMapOf()
+    private var transactions: MutableMap<Date, BigDecimal> = mutableMapOf()
     private var statistics: StatisticsDto = StatisticsDto()
 
     @Synchronized()
@@ -51,11 +48,14 @@ class TransactionsService(private val config: TimeIntervalConfig) {
             .filter { (key) -> isTransactionValid(key.toInstant()) }
             .values.toList()
 
-        statistics.count = latestTransactionAmounts.count().toLong()
-        statistics.sum = latestTransactionAmounts.sum()
-        statistics.max = latestTransactionAmounts.maxOrNull()
-        statistics.min = latestTransactionAmounts.minOrNull()
-        statistics.avg = latestTransactionAmounts.average()
+        if (latestTransactionAmounts.isNotEmpty()) {
+            statistics.sum = latestTransactionAmounts.stream()
+                .reduce(BigDecimal.ZERO, BigDecimal::add).setScale(2, RoundingMode.HALF_UP)
+            statistics.avg = statistics.sum?.divide(BigDecimal(latestTransactionAmounts.size), RoundingMode.HALF_UP)
+            statistics.max = latestTransactionAmounts.maxOrNull()?.setScale(2, RoundingMode.HALF_UP)
+            statistics.min = latestTransactionAmounts.minOrNull()?.setScale(2, RoundingMode.HALF_UP)
+            statistics.count = latestTransactionAmounts.count().toLong()
+        }
     }
 
     private fun isTransactionValid(timestamp : Instant) : Boolean {
@@ -66,5 +66,4 @@ class TransactionsService(private val config: TimeIntervalConfig) {
     private fun isTransactionUnprocessable(timestamp: Instant) : Boolean {
         return timestamp.isAfter(Instant.now())
     }
-
 }

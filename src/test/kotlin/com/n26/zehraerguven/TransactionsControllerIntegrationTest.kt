@@ -13,6 +13,9 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
+import org.springframework.test.context.ActiveProfiles
+import java.math.BigDecimal
+import java.math.RoundingMode
 import java.net.URI
 import java.time.Duration
 import java.time.Instant
@@ -35,7 +38,7 @@ class TransactionsControllerIntegrationTest {
     @Test
     fun  `post transaction should return CREATED when transaction is successful` () {
         //given
-        val transaction = TransactionRequest(Date.from(Instant.now() - Duration.ofSeconds(5)), 21.45)
+        val transaction = TransactionRequest(Date.from(Instant.now() - Duration.ofSeconds(5)), 21.45.toBigDecimal())
         val uri = URI("$baseUrl/transactions")
 
         //when
@@ -51,7 +54,7 @@ class TransactionsControllerIntegrationTest {
     @Test
     fun `post transaction should return NO_CONTENT when timestamp is old` () {
         //given
-        val transaction = TransactionRequest(Date.from(Instant.now() - Duration.ofMinutes(5)), 13.2355)
+        val transaction = TransactionRequest(Date.from(Instant.now() - Duration.ofMinutes(5)), 13.2355.toBigDecimal())
         val postURI = URI("$baseUrl/transactions")
 
         //when
@@ -67,7 +70,7 @@ class TransactionsControllerIntegrationTest {
     @Test
     fun `post transaction should return UNPROCESSABLE_ENTITY when timestamp is for future` () {
         //given
-        val transaction = TransactionRequest(Date.from(Instant.now() + Duration.ofMinutes(5)), 18.65)
+        val transaction = TransactionRequest(Date.from(Instant.now() + Duration.ofMinutes(5)), 18.65.toBigDecimal())
         val postURI = URI("$baseUrl/transactions")
 
         //when
@@ -83,8 +86,8 @@ class TransactionsControllerIntegrationTest {
     @Test
     fun  `get statistics should success` () {
         //given
-        val transaction1 = TransactionRequest(Date.from(Instant.now() - Duration.ofSeconds(5)), 18.65)
-        val transaction2 = TransactionRequest(Date.from(Instant.now() - Duration.ofSeconds(10)), 12.35)
+        val transaction1 = TransactionRequest(Date.from(Instant.now() - Duration.ofSeconds(5)), 18.65.toBigDecimal())
+        val transaction2 = TransactionRequest(Date.from(Instant.now() - Duration.ofSeconds(10)), 12.35.toBigDecimal())
         val postURI = URI("$baseUrl/transactions")
 
         restTemplate.postForEntity(postURI,
@@ -102,10 +105,10 @@ class TransactionsControllerIntegrationTest {
 
         //then
         assertThat(result.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(result.body?.sum).isEqualTo(31.0)
-        assertThat(result.body?.avg).isEqualTo(15.5)
-        assertThat(result.body?.max).isEqualTo(18.65)
-        assertThat(result.body?.min).isEqualTo(12.35)
+        assertThat(result.body?.sum).isEqualTo(BigDecimal(31).setScale(2, RoundingMode.HALF_UP))
+        assertThat(result.body?.avg).isEqualTo(BigDecimal(15.5).setScale(2, RoundingMode.HALF_UP))
+        assertThat(result.body?.max).isEqualTo(BigDecimal(18.65).setScale(2, RoundingMode.HALF_UP))
+        assertThat(result.body?.min).isEqualTo(BigDecimal(12.35).setScale(2, RoundingMode.HALF_UP))
         assertThat(result.body?.count).isEqualTo(2)
     }
 
@@ -124,8 +127,8 @@ class TransactionsControllerIntegrationTest {
     @Test
     fun `get statistics should no value when all transactions deleted` () {
         //given
-        val transaction1 = TransactionRequest(Date.from(Instant.now() - Duration.ofSeconds(5)), 18.65)
-        val transaction2 = TransactionRequest(Date.from(Instant.now() - Duration.ofSeconds(10)), 12.35)
+        val transaction1 = TransactionRequest(Date.from(Instant.now() - Duration.ofSeconds(5)), 18.65.toBigDecimal())
+        val transaction2 = TransactionRequest(Date.from(Instant.now() - Duration.ofSeconds(10)), 12.35.toBigDecimal())
         val postURI = URI("$baseUrl/transactions")
 
         restTemplate.postForEntity(postURI,
