@@ -23,12 +23,11 @@ It guarantees the same object can have only one thread will be executing at the 
 
 This application uses Maven build tool as it's required. You can use either java or maven commands to run locally.
 
-**Please make sure you give the server port property before you run.**
 ```bash
-java -jar target/zehraerguven-0.0.1-SNAPSHOT.jar --server.port=8080
+java -jar target/zehraerguven-0.0.1-SNAPSHOT.jar 
 ```
 ```bash
-mvn spring-boot:run -Dspring-boot.run.arguments="--server.port=8080"
+mvn spring-boot:run
 ```
 
 ## Deployment
